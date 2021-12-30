@@ -25,8 +25,16 @@ pub async fn command(ctx: &Context, command: &ApplicationCommandInteraction) {
                     return;
                 }
                 let user_id = command.clone().member.unwrap().clone().user.id;
-                let _ = command.create_interaction_response(&ctx.http, |f| f.kind(DeferredChannelMessageWithSource).interaction_response_data(|data|data.
-                    flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL))).await;
+                let _ = command.create_interaction_response(
+                    &ctx.http,
+                    |response| {
+                        response.interaction_response_data(
+                            |data| data
+                                .flags(InteractionApplicationCommandCallbackDataFlags::EPHEMERAL
+                                )
+                        ).kind(InteractionResponseType::DeferredChannelMessageWithSource)
+                    },
+                ).await.unwrap();
                 for guild in &ctx.cache.guilds().await {
                     if guild.member(&ctx, &user_id).await.is_ok() {
                         let _ = guild.edit_member(&ctx.http, &user_id,
